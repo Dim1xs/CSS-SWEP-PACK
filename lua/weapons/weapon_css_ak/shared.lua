@@ -107,7 +107,6 @@ function SWEP:PrimaryAttack()
 
 	local vecSrc		= pPlayer:Weapon_ShootPosition();
 	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
-	pPlayer:SwepAuthorDim1xs();
 
 
 	-- vecSrc - position of fire, vecAiming - Directory where is shooting, bullet spread, distance, Ammo Type
