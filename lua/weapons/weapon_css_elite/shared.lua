@@ -1,4 +1,4 @@
---/SWEP CREATED BY DIM1XS
+--//SWEP CREATED BY DIM1XS
 
 --//DONT TOUCH IT!
 VECTOR_CONE_1DEGREES   =     Vector( 0.00873, 0.00873, 0.00873 )
@@ -14,39 +14,39 @@ VECTOR_CONE_10DEGREES  =     Vector( 0.08716, 0.08716, 0.08716 )
 VECTOR_CONE_15DEGREES  =     Vector( 0.13053, 0.13053, 0.13053 )
 VECTOR_CONE_20DEGREES  =     Vector( 0.17365, 0.17365, 0.17365 )
 
-SWEP.Name = "[CSS] AK47"
+SWEP.Name = "[CSS] .40 Dual Elites"
 
-SWEP.PrintName				= "AK47"
-SWEP.ViewModel 			    = "models/weapons/v_rif_ak47.mdl"
+SWEP.PrintName				= ".40 Dual Elites"
+SWEP.ViewModel				= "models/weapons/v_pist_elite.mdl"
+SWEP.WorldModel			= "models/weapons/w_pist_elite.mdl"
 SWEP.ViewModelFOV           =  65
-SWEP.WorldModel			= "models/weapons/w_rif_ak47.mdl"
 SWEP.anim_prefix			= "python"
-SWEP.Slot				= 2
+SWEP.Slot				= 1
 SWEP.SlotPos		= 0
 
-SWEP.ViewKick = 6.75
-
+SWEP.ViewKick = 0.15
+SWEP.Penalty = 0.2
 
 SWEP.Primary = 
-{
+{ 
 	ClipSize = 30,
-	DefaultClip = 30,
-	Automatic = true,
-	Ammo = "SMG1"
+	DefaultClip =30,
+	Automatic = false,
+	Ammo = "Pistol"
 }
 
 SWEP.Weight					= 7
 SWEP.item_flags				= 0
 
-SWEP.damage					= 36
+SWEP.damage					= 20
 
 SWEP.SoundData				=
 {
 	empty					= "Weapon_Pistol.Empty",
-	single_shot				= "addons/css/akshoot.mp3"
+	single_shot				= "addons/weapons/elite/elite-1.wav"
 }
 
-SWEP.showusagehint			= 1
+SWEP.showusagehint			= 0
 SWEP.AutoSwitchTo			= 1
 SWEP.AutoSwitchFrom			= 1
 SWEP.BuiltRightHanded		= 0
@@ -56,34 +56,19 @@ SWEP.MeleeWeapon			= 0
 -- TODO; implement Activity enum library!!
 SWEP.m_acttable				=
 {
-	{ ACT_RANGE_ATTACK1,			ACT_RANGE_ATTACK_AR2,					true },
-	{ ACT_RELOAD,					ACT_RELOAD_SMG1,						true },
-	{ ACT_IDLE,				        ACT_IDLE_SMG1,							true },
-	{ ACT_IDLE_ANGRY,				ACT_IDLE_ANGRY_SMG1,					true },
-	{ ACT_WALK,					    ACT_WALK_RIFLE,							true },
-	
-	{ ACT_HL2MP_IDLE,					ACT_HL2MP_IDLE_AR2,					false },
-	{ ACT_HL2MP_RUN,					ACT_HL2MP_RUN_AR2,					false },
-	{ ACT_HL2MP_IDLE_CROUCH,			ACT_HL2MP_IDLE_CROUCH_AR2,			false },
-	{ ACT_HL2MP_WALK_CROUCH,			ACT_HL2MP_WALK_CROUCH_AR2,			false },
-	{ ACT_HL2MP_GESTURE_RANGE_ATTACK,	ACT_HL2MP_GESTURE_RANGE_ATTACK_AR2,	false },
-	{ ACT_HL2MP_GESTURE_RELOAD,			ACT_HL2MP_GESTURE_RELOAD_AR2,		false },
-	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_AR2,					false },
-	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_AR2,				false },
-    { ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_AR2,					false },
-	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_AR2,			false },
+	{ 1048, 977, false },
+	{ 1049, 979, false },
 
-	{ ACT_MP_RUN,						ACT_HL2MP_RUN_AR2,					false },
-	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_AR2,			false },
+	{ 1058, 978, false },
+	{ 1061, 980, false },
 
-	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_AR2,	false },
-	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_AR2,	false },
+	{ 1073, 981, false },
+	{ 1077, 981, false },
 
-	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_AR2,		false },
-	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_AR2,		false },
+	{ 1090, 982, false },
+	{ 1093, 982, false },
 
-	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_AR2,					false },
-
+	{ 1064, 983, false },
 };
 
 function SWEP:Initialize()
@@ -107,22 +92,20 @@ function SWEP:PrimaryAttack()
 			self:Reload();
 		else
 			self:WeaponSound( 0 );
-			self.m_flNextPrimaryAttack = 0.3;
+			self.m_flNextPrimaryAttack = 0.15;
 		end
 
 		return;
 	end
 
 	self:WeaponSound( 1 );
-	--pPlayer:DoMuzzleFlash();
-
+	pPlayer:DoMuzzleFlash();
 
 	self:SendWeaponAnim( 180 );
-
 	pPlayer:SetAnimation( 5 );
 	ToHL2MPPlayer(pPlayer):DoAnimationEvent( 0 );
 
-	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.10;
+	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.12;
 	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.75;
 
 	self.m_iClip1 = self.m_iClip1 - 1;
@@ -130,23 +113,23 @@ function SWEP:PrimaryAttack()
 	local vecSrc		= pPlayer:Weapon_ShootPosition();
 	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
 
+
 	-- vecSrc - position of fire, vecAiming - Directory where is shooting, bullet spread, distance, Ammo Type
-	local info = FireBulletsInfo_t(1, vecSrc, vecAiming, VECTOR_CONE_1DEGREES,4096, self.m_iPrimaryAmmoType);
+	local info = FireBulletsInfo_t(1, vecSrc, vecAiming, vec3_origin,8096, self.m_iPrimaryAmmoType);
+	info.m_flDamage = 20;
 	info.m_pAttacker = pPlayer;
-	info.m_iPlayerDamage = 14
-	info.m_flDamage = 36;
+	info.m_iPlayerDamage = 6
 
 	-- Fire the bullets, and force the first shot to be perfectly accuracy
 	pPlayer:FireBullets( info );
 
-	
+
 	local viewkick = QAngle()
-	viewkick.x = -(self.ViewKick * 0.30)--//SLIDE LIMIT
-	viewkick.y = random.RandomFloat(2 + self.ViewKick, -2 + -self.ViewKick) * 0.18 --//VERTICAL LIMIT
+	viewkick.x = -(self.ViewKick * (self.Penalty + 1)) + random.RandomFloat( -0.25, -0.5 )
+	viewkick.y = (viewkick.x * 0.15) + random.RandomFloat( -.6, .6 )
 	viewkick.z = 0
 
-	pPlayer:ViewPunch( viewkick )
-
+	pPlayer:ViewPunch( viewkick );
 
 	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then
 		-- HEV suit - indicate out of ammo condition
@@ -155,6 +138,7 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+	--//SWEP CREATED BY DIM1XS
 end
 
 function SWEP:Reload()
@@ -190,5 +174,4 @@ end
 
 function SWEP:DoImpactEffect()
 end
-
 --//SWEP CREATED BY DIM1XS

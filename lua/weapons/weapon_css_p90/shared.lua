@@ -12,45 +12,46 @@ VECTOR_CONE_8DEGREES   =     Vector( 0.06976, 0.06976, 0.06976 )
 VECTOR_CONE_9DEGREES   =     Vector( 0.07846, 0.07846, 0.07846 )
 VECTOR_CONE_10DEGREES  =     Vector( 0.08716, 0.08716, 0.08716 )
 VECTOR_CONE_15DEGREES  =     Vector( 0.13053, 0.13053, 0.13053 )
-VECTOR_CONE_20DEGREES  =     Vector( 0.17365, 0.17365, 0.17365 )     
+VECTOR_CONE_20DEGREES  =     Vector( 0.17365, 0.17365, 0.17365 )
 
-SWEP.Name = "[CSS] Krieg 552"
 
-SWEP.PrintName					= "Krieg 552"
-SWEP.ViewModel 			    = "models/weapons/v_rif_sg552.mdl"
-SWEP.ViewModelFOV       =  65
-SWEP.WorldModel				=	"models/weapons/w_rif_sg552.mdl"
-SWEP.anim_prefix				= "python"
-SWEP.Slot						= 2
+SWEP.Name = "[CSS] P90"
+
+SWEP.PrintName				= "P90"
+SWEP.ViewModel 			    = "models/weapons/v_smg_p90.mdl"
+SWEP.ViewModelFOV           =  65
+SWEP.WorldModel			= "models/weapons/w_smg_p90.mdl"
+SWEP.anim_prefix			= "python"
+SWEP.Slot				= 4
 SWEP.SlotPos		= 0
 
-SWEP.ViewKick = 7
+SWEP.ViewKick = 1.753
 
 SWEP.Primary = 
 {
-	ClipSize = 30,
-	DefaultClip = 30,
+	ClipSize = 60,
+	DefaultClip = 60,
 	Automatic = true,
 	Ammo = "SMG1"
 }
 
-SWEP.Weight							= 7
-SWEP.item_flags					= 0
+SWEP.Weight					= 7
+SWEP.item_flags				= 0
 
-SWEP.damage							= 28
+SWEP.damage					= 35
 
-SWEP.SoundData					=
+SWEP.SoundData				=
 {
-	empty									= "Weapon_Pistol.Empty",
-	single_shot						= "addons/css/sg552-1.mp3"
+	empty					= "Weapon_Pistol.Empty",
+	single_shot				= "addons/css/p90-1.mp3"
 }
 
 SWEP.showusagehint			= 1
-SWEP.AutoSwitchTo				= 1
+SWEP.AutoSwitchTo			= 1
 SWEP.AutoSwitchFrom			= 1
 SWEP.BuiltRightHanded		= 0
 SWEP.AllowFlipping			= 1
-SWEP.MeleeWeapon				= 0
+SWEP.MeleeWeapon			= 0
 
 -- TODO; implement Activity enum library!!
 SWEP.m_acttable				=
@@ -88,7 +89,6 @@ SWEP.m_acttable				=
 function SWEP:Initialize()
 	self.m_bReloadsSingly	= false;
 	self.m_bFiresUnderwater	= false;
-	self.isZoomed = false;
 end
 
 function SWEP:Precache()
@@ -107,7 +107,7 @@ function SWEP:PrimaryAttack()
 			self:Reload();
 		else
 			self:WeaponSound( 0 );
-			self.m_flNextPrimaryAttack = 0.3;
+			self.m_flNextPrimaryAttack = 0.1;
 		end
 
 		return;
@@ -120,11 +120,7 @@ function SWEP:PrimaryAttack()
 	pPlayer:SetAnimation( 5 );
 	ToHL2MPPlayer(pPlayer):DoAnimationEvent( 0 );
 
-	if self.isZoomed == false then 
-        self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.10;
-  else
-        self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.18;
-  end
+	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.08;
 	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.75;
 
 	self.m_iClip1 = self.m_iClip1 - 1;
@@ -134,9 +130,9 @@ function SWEP:PrimaryAttack()
 
 
 	-- vecSrc - position of fire, vecAiming - Directory where is shooting, bullet spread, distance, Ammo Type
-	local info = FireBulletsInfo_t(1, vecSrc, vecAiming, vec3_origin,4096, self.m_iPrimaryAmmoType);
-	info.m_flDamage = 28;
-	info.m_iPlayerDamage = 28;
+	local info = FireBulletsInfo_t(1, vecSrc, vecAiming, VECTOR_CONE_4DEGREES,4096, self.m_iPrimaryAmmoType);
+	info.m_flDamage = 35;
+	info.m_iPlayerDamage = 8;
 	info.m_pAttacker = pPlayer;
 
 	-- Fire the bullets, and force the first shot to be perfectly accuracy
@@ -156,25 +152,6 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
-	local pPlayer = self:GetOwner();
-
-	if ( ToBaseEntity( pPlayer ) == NULL ) then
-		return;
-	end
-
-	if self.isZoomed == false then 
-        pPlayer:SetFOV(self,50,0.2)
-        self.isZoomed = true;
-        self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.25;
-  else
-        pPlayer:SetFOV(self,0,0.2)
-        self.isZoomed = false;
-        self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.25;
-
-  end
-
-    self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.14;
-	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.80;
 	--//SWEP CREATED BY DIM1XS
 end
 
@@ -201,11 +178,6 @@ function SWEP:GetDrawActivity()
 end
 
 function SWEP:Holster( pSwitchingTo )
-	local pPlayer = ToHL2Player(self:GetOwner())
-    if ( pPlayer == nil ) then
-      return;
-    end
-    pPlayer:SetFOV(self,0,0)
 end
 
 function SWEP:ItemPostFrame()

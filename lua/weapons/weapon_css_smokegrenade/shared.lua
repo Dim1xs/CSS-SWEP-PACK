@@ -1,8 +1,8 @@
-SWEP.Name = "[CSS] -HE Grenade"
+SWEP.Name = "[CSS] -Smoke Grenade"
 
-SWEP.PrintName				= "HE Grenade"
-SWEP.ViewModel				= "models/weapons/v_eq_fraggrenade.mdl"
-SWEP.WorldModel			= "models/weapons/w_eq_fraggrenade.mdl"
+SWEP.PrintName				= "Smoke Grenade"
+SWEP.ViewModel				= "models/weapons/v_eq_smokegrenade.mdl"
+SWEP.WorldModel			= "models/weapons/w_eq_smokegrenade.mdl"
 SWEP.ViewModelFOV           =  65
 SWEP.anim_prefix			= "python"
 SWEP.Slot				= 0
@@ -105,17 +105,17 @@ function SWEP:PrimaryAttack()
 	
 	pPlayer:EyeVectors(forward,right,up)
 
-	local ent = CreateEntityByName("prop_css_hegrenade")
-	if ent ~= NULL or ent ~= nil then
-		ent:SetLocalOrigin(vecSrc + forward * 16)
-		ent.m_nSkin = 1;
-		ent:Spawn()		
-		local phys = ent:VPhysicsGetObject()
-		if phys ~= nil then
-			phys:SetVelocity(forward * 748,forward * 748)
+	if not _CLIENT then
+		local ent = CreateEntityByName("prop_css_smokegrenade")
+		if ent ~= NULL or ent ~= nil then
+			ent:SetLocalOrigin(vecSrc + forward * 16)
+			ent.m_nSkin = 1;
+			ent:Spawn()		
+			local phys = ent:VPhysicsGetObject()
+			if phys ~= nil then
+				phys:SetVelocity(forward * 748,forward * 748)
+			end
 		end
-
-		
 	end
 
 
@@ -153,17 +153,17 @@ function SWEP:SecondaryAttack()
 	
 	pPlayer:EyeVectors(forward,right,up)
 
-	local ent = CreateEntityByName("prop_css_hegrenade")
-	if ent ~= NULL or ent ~= nil then
-		ent:SetLocalOrigin(vecSrc + forward * 16)
-		ent.m_nSkin = 1;
-		ent:Spawn()		
-		local phys = ent:VPhysicsGetObject()
-		if phys ~= nil then
-			phys:SetVelocity(forward * 348,forward * 348)
+	if not _CLIENT then
+		local ent = CreateEntityByName("prop_css_smokegrenade")
+		if ent ~= NULL or ent ~= nil then
+			ent:SetLocalOrigin(vecSrc + forward * 16)
+			ent.m_nSkin = 1;
+			ent:Spawn()		
+			local phys = ent:VPhysicsGetObject()
+			if phys ~= nil then
+				phys:SetVelocity(forward * 348,forward * 348)
+			end
 		end
-
-		
 	end
 
 

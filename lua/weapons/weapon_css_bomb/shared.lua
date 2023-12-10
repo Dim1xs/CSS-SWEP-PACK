@@ -1,24 +1,28 @@
 --/SWEP CREATED BY DIM1XS
 
-SWEP.printname				= "С4 CSS"
-SWEP.viewmodel				= "models/weapons/v_c4.mdl"
-SWEP.playermodel			= "models/weapons/w_c4.mdl"
-SWEP.viewmodelfov           =  65
+SWEP.Name = "[CSS] C4"
+
+SWEP.PrintName				= "С4"
+SWEP.ViewModel				= "models/weapons/v_c4.mdl"
+SWEP.WorldModel				= "models/weapons/w_c4.mdl"
+SWEP.ViewModelFOV           =  65
 SWEP.anim_prefix			= "python"
-SWEP.bucket					= 0
-SWEP.bucket_position		= 2
+SWEP.Slot					= 0
+SWEP.SlotPos				= 0
+SWEP.DrawAmmo = false
 
-SWEP.clip_size				= 100
-SWEP.clip2_size				= 50
-SWEP.default_clip			= -1
-SWEP.default_clip2			= -1
-SWEP.primary_ammo			= "None"
-SWEP.secondary_ammo			= "None"
+SWEP.Primary = 
+{
+	ClipSize = 1,
+	DefaultClip = 1,
+	Automatic = false,
+	Ammo = "Pistol"
+}
 
-SWEP.weight					= 7
+SWEP.Weight					= 7
 SWEP.item_flags				= 0
 
-SWEP.damage					= 150
+SWEP.damage					= 0
 
 SWEP.SoundData				=
 {
@@ -27,8 +31,8 @@ SWEP.SoundData				=
 }
 
 SWEP.showusagehint			= 0
-SWEP.autoswitchto			= 1
-SWEP.autoswitchfrom			= 1
+SWEP.AutoSwitchTo			= 1
+SWEP.AutoSwitchFrom			= 1
 SWEP.BuiltRightHanded		= 0
 SWEP.AllowFlipping			= 0
 SWEP.MeleeWeapon			= 0
@@ -54,6 +58,7 @@ function SWEP:Initialize()
 	self.m_bReloadsSingly	= false;
 	self.m_bFiresUnderwater	= false;
 	self.PrecacheSound("addons/css/pinpull.mp3")
+	self.Delay = 0
 end
 
 function SWEP:Precache()
@@ -67,55 +72,42 @@ function SWEP:PrimaryAttack()
 	end
 
 	self:WeaponSound( 1 );
-	pPlayer:DoMuzzleFlash();
-
 	self:SendWeaponAnim( 180 );
 	pPlayer:SetAnimation( 5 );
 	ToHL2Player(pPlayer):DoAnimationEvent( 0 );
 
 	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.01;
 	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.1;
+	self.Delay = gpGlobals.curtime() + 4
 
 	-- self.m_iClip1 = self.m_iClip1 - 1;
 
-	local vecSrc		= pPlayer:Weapon_ShootPosition();
-	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
+	---------------------------------------
+	local vecSrc = pPlayer:Weapon_ShootPosition()
+	local vecAim = pPlayer:GetAutoaimVector(0.08715574274766)
+	local vecEye = pPlayer:EyePosition();
 
-	local forward = Vector()
-	local right = Vector()
-	local up = Vector()
-	
-	pPlayer:EyeVectors(forward,right,up)
+	local vForward = Vector()
+	local vRight = Vector()
+	local vUp = Vector()
+	pPlayer:EyeVectors(vForward,nil,nil);
 
-	local ent = ToCPhysicsProp(CreateEntityByName("prop_c4_css"))
-	if ent ~= NULL or ent ~= nil then
-		ent:SetLocalOrigin(vecSrc + forward * 16)
-		ent.m_nSkin = 1;
-		ent:Spawn()		
-		local phys = ent:VPhysicsGetObject()
-		if phys ~= nil then
-			phys:SetVelocity(forward * 128,forward * 128)
+	local tr = trace_t()
+	UTIL.TraceLine( vecEye, vecEye + vForward * 20, MASK_SHOT_HULL, pPlayer, 0, tr );
+
+	if not (_CLIENT) then
+		local ent = CreateEntityByName("prop_css_bomb")
+		if ent ~= NULL or ent ~= nil then
+			ent:SetLocalOrigin(tr.endpos)
+			ent.m_nSkin = 1;
+			ent:Spawn()		
 		end
-
-		
 	end
 
-	
-	local angles = pPlayer:GetLocalAngles();
-
-	angles.x = angles.x + random.RandomInt( -1, 1 );
-	angles.y = angles.y + random.RandomInt( -1, 1 );
-	angles.z = 0;
-
-if not _CLIENT then
-	-- pPlayer:SnapEyeAngles( angles );
-	if(self ~= nil or self ~= NULL) then
+	if not _CLIENT then
+		if(self ~= nil or self ~= NULL) then
 		pPlayer:HideViewModels();
-		--pPlayer:RemovePlayerItem(self)
-		--pPlayer:Weapon_Detach(self)
-		--self:DestroyItem()
-		UTIL.Remove(self) -- this actually works lmao these above were crashing game
-
+		UTIL.Remove(self)
 	end
 end
 
@@ -128,42 +120,6 @@ end
 end
 
 function SWEP:SecondaryAttack()
-	local pOwner = self:GetOwner();
-
-	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 1;
-	if ( ToBaseEntity( pOwner ) == NULL ) then
-		return;
-	end
-	local pPlayer = ToBasePlayer( pOwner )
-	if ( pPlayer == NULL ) then
-		return;
-	end
-
-	self:WeaponSound( 0 );
-	local vecSrc		= pPlayer:Weapon_ShootPosition();
-	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
-
-	local forward = Vector()
-	local right = Vector()
-	local up = Vector()
-	
-	pPlayer:EyeVectors(forward,right,up)
-
-	local ent = ToCPhysicsProp(CreateEntityByName("prop_hegrenade_css"))
-	if ent ~= NULL or ent ~= nil then
-		ent:SetLocalOrigin(vecSrc + forward * 16)
-		ent.m_nSkin = 1;
-		ent:Spawn()		
-		local phys = ent:VPhysicsGetObject()
-		if phys ~= nil then
-			phys:SetVelocity(forward * 64,forward * 64)
-		end
-
-		pPlayer:HideViewModels();
-		UTIL.Remove(self)
-
-    end
-	--/SWEP CREATED BY DIM1XS
 end
 
 function SWEP:Reload()

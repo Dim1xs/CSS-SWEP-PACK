@@ -1,20 +1,27 @@
 --//SWEP CREATED BY DIM1XS
 
-SWEP.printname				= "M3 SUPER90 CSS"
-SWEP.viewmodel				= "models/weapons/v_shot_m3super90.mdl"
-SWEP.playermodel			= "models/weapons/w_shot_m3super90.mdl"
-SWEP.viewmodelfov           = 70
-SWEP.anim_prefix			= "shotgun"
-SWEP.bucket					= 3
-SWEP.bucket_position		= 2
-SWEP.clip_size				= 7
-SWEP.clip2_size				= -1
-SWEP.default_clip			= 7
-SWEP.default_clip2			= -1
-SWEP.primary_ammo			= "Buckshot"
-SWEP.secondary_ammo			= "None"
+SWEP.Name = "[CSS] M3 SUPER90"
 
-SWEP.weight					= 7
+SWEP.PrintName				= "M3 SUPER90"
+SWEP.ViewModel				= "models/weapons/v_shot_m3super90.mdl"
+SWEP.WorldModel			= "models/weapons/w_shot_m3super90.mdl"
+SWEP.ViewModelFOV           = 70
+SWEP.anim_prefix			= "shotgun"
+SWEP.Slot				= 3
+SWEP.SlotPos		= 0
+
+SWEP.ViewKick = 7
+
+SWEP.Primary = 
+{
+	ClipSize = 7,
+	DefaultClip = 7,
+	Automatic = false,
+	Ammo = "Buckshot"
+}
+	
+
+SWEP.Weight					= 7
 SWEP.item_flags				= 0
 
 SWEP.damage					= 45
@@ -24,7 +31,7 @@ SWEP.SoundData				=
 	empty=			"Weapon_Shotgun.Empty",
 	reload=			"addons/m3_insertshell.wav",
 	special1 =			"",
-		single_shot=		"addons/m3-1.wav",
+		single_shot=		"addons/weapons/m3/m3-1.wav",
 		double_shot=		"addons/m3-1.wav",
 		-- NPC WEAPON SOUNDS
 		reload_npc=		"Weapon_Shotgun.NPC_Reload",
@@ -32,8 +39,8 @@ SWEP.SoundData				=
 }
 
 SWEP.showusagehint			= 0
-SWEP.autoswitchto			= 1
-SWEP.autoswitchfrom			= 1
+SWEP.AutoSwitchTo			= 1
+SWEP.AutoSwitchFrom			= 1
 SWEP.BuiltRightHanded		= 0
 SWEP.AllowFlipping			= 1
 SWEP.MeleeWeapon			= 0
@@ -43,23 +50,38 @@ SWEP.MeleeWeapon			= 0
 -- TODO; implement Activity enum library!!
 SWEP.m_acttable				=
 {
-	{ 1048, 977, false },
-	{ 1049, 979, false },
+	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_SHOTGUN,				true },
+	{ ACT_RELOAD,						ACT_RELOAD_SHOTGUN,						true },
+	{ ACT_IDLE,				        	ACT_IDLE_SMG1,							true },
+	{ ACT_IDLE_ANGRY,					ACT_IDLE_ANGRY_SHOTGUN,					true },
+	{ ACT_WALK,					    	ACT_WALK_RIFLE,							true },
+	
+	{ ACT_HL2MP_IDLE,					ACT_HL2MP_IDLE_SHOTGUN,					false },
+	{ ACT_HL2MP_RUN,					ACT_HL2MP_RUN_SHOTGUN,					false },
+	{ ACT_HL2MP_IDLE_CROUCH,			ACT_HL2MP_IDLE_CROUCH_SHOTGUN,			false },
+	{ ACT_HL2MP_WALK_CROUCH,			ACT_HL2MP_WALK_CROUCH_SHOTGUN,			false },
+	{ ACT_HL2MP_GESTURE_RANGE_ATTACK,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SHOTGUN,	false },
+	{ ACT_HL2MP_GESTURE_RELOAD,			ACT_HL2MP_GESTURE_RELOAD_SHOTGUN,		false },
+	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_SHOTGUN,					false },
+	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_SHOTGUN,				false },
+    { ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_SHOTGUN,					false },
+	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_SHOTGUN,			false },
 
-	{ 1058, 978, false },
-	{ 1061, 980, false },
+	{ ACT_MP_RUN,						ACT_HL2MP_RUN_SHOTGUN,					false },
+	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_SHOTGUN,			false },
 
-	{ 1073, 981, false },
-	{ 1077, 981, false },
+	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SHOTGUN,	false },
+	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_SHOTGUN,	false },
 
-	{ 1090, 982, false },
-	{ 1093, 982, false },
+	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_SHOTGUN,		false },
+	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_SHOTGUN,		false },
 
-	{ 1064, 983, false },
+	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_SHOTGUN,					false },
+
 };
 
 function SWEP:Initialize()
-	self.m_bReloadsSingly	=  false;
+	self.m_bReloadsSingly	=  true;
 	self.m_bFiresUnderwater	= false;
 	self.m_bNeedPump = false;
 	self.m_bInReload = false;
@@ -70,7 +92,6 @@ function SWEP:Initialize()
 		return
 	end
 	
-	self.m_bNeedPump = false;
 	
 	self:WeaponSound( 11 ); -- Special1 Sound
 
@@ -116,7 +137,7 @@ function SWEP:PrimaryAttack()
 	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
 
 	-- vecSrc - position of fire, vecAiming - Directory where is shooting, Vector - bullet spread, number - distance, self.m_iPrimaryAmmoType - Ammo Type 
-	local info = FireBulletsInfo_t(7, vecSrc, vecAiming, Vector( 0.08716, 0.08716, 0.08716 ),MAX_TRACE_LENGTH, self.m_iPrimaryAmmoType)
+	local info = FireBulletsInfo_t(7, vecSrc, vecAiming, Vector( 0.08716, 0.08716, 0.08716 ),8096, self.m_iPrimaryAmmoType)
 	info.m_flDamage = 3;
 	info.m_pAttacker = pPlayer;	-- Who shoots?
 	info.m_iPlayerDamage = 3; -- Damage of single bullet
@@ -128,7 +149,12 @@ function SWEP:PrimaryAttack()
 		self.m_bNeedPump = true
 	end
 
-	pPlayer:ViewPunch( QAngle( 0, random.RandomFloat( -0.25, 1.5 ), 0 ) ); -- Some Recoil
+	local viewkick = QAngle()
+	viewkick.x = -(self.ViewKick * 0.30)--//SLIDE LIMIT
+	viewkick.y = random.RandomFloat(2 + self.ViewKick, -2 + -self.ViewKick) * 0.18 --//VERTICAL LIMIT
+	viewkick.z = 0
+
+	pPlayer:ViewPunch( viewkick )-- Some Recoil
 	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then
 		-- HEV suit - indicate out of ammo condition
 		pPlayer:SetSuitUpdate( "!HEV_AMO0", 0, 0 );
@@ -136,51 +162,6 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
-
-	local pPlayer = self:GetOwner();
-
-	if ( ToBaseEntity( pPlayer ) == NULL ) then
-		return;
-	end
-
-	-- Check if we have ammo in clip else reload if we dont have ammo then dont reload 
-	if (self.m_iClip1 <= 0 ) then
-			self:WeaponSound(0);
-			self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.36;
-		return
-	end
-	self:WeaponSound( 1 );
-	pPlayer:DoMuzzleFlash();
-
-	self:SendWeaponAnim( 180 );
-	pPlayer:SetAnimation( 5 );
-	ToHL2Player(pPlayer):DoAnimationEvent( 0 );
-	
-	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.56;
-	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.76;
-
-	local vecSrc		= pPlayer:Weapon_ShootPosition();
-	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
-	
-	
-	
-	self.m_iClip1 = self.m_iClip1 - 2;
-	
-	if(self.m_iClip1) then
-		self.m_bNeedPump = true
-	end
-	
-	-- vecSrc - position of fire, vecAiming - Direction where is shooting, Vector - bullet spread, number - distance, self.m_iPrimaryAmmoType - Ammo Type 
-	local info = FireBulletsInfo_t(12, vecSrc, vecAiming, Vector( 0.08716, 0.08716, 0.08716 ),MAX_TRACE_LENGTH, self.m_iPrimaryAmmoType)
-	info.m_pAttacker = pPlayer;	-- Who is attacking?
-	info.m_iPlayerDamage = 4; -- Damage of single bullet
-	pPlayer:FireBullets( info ); -- Fire !!!
-
-	pPlayer:ViewPunch( QAngle( random.RandomFloat( -1, 5 ), 0, 0 ) ); -- More recoil
-	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then
-		-- HEV suit - indicate out of ammo condition
-		pPlayer:SetSuitUpdate( "!HEV_AMO0", 0, 0 );
-	end
 	--//SWEP CREATED BY DIM1XS
 end
 
