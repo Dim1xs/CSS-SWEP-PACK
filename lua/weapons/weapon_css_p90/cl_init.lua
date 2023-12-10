@@ -8,5 +8,4 @@ function SWEP:DrawModel( flags )
 end
 
 function SWEP:MuzzleFlash( pos1, angles, type, firstPerson )
-	return false
 end

@@ -1,21 +1,25 @@
 --/SWEP CREATED BY DIM1XS
 
-SWEP.printname				= "Knife"
-SWEP.viewmodel				= "models/weapons/v_knife_t.mdl"
-SWEP.playermodel			= "models/weapons/w_knife_t.mdl"
-SWEP.viewmodelfov           =  65
+SWEP.Name = "[CSS] Knife"
+
+SWEP.PrintName				= "Knife"
+SWEP.ViewModel				= "models/weapons/v_knife_t.mdl"
+SWEP.WorldModel			= "models/weapons/w_knife_t.mdl"
+SWEP.ViewModelFOV           =  65
 SWEP.anim_prefix			= "python"
-SWEP.bucket					= 1
-SWEP.bucket_position		= 1
+SWEP.Slot				= 1
+SWEP.SlotPos		= 0
+SWEP.DrawAmmo = false
 
-SWEP.clip_size				= 1
-SWEP.clip2_size				= -1
-SWEP.default_clip			= 1
-SWEP.default_clip2			= -1
-SWEP.primary_ammo			= "Pistol"
-SWEP.secondary_ammo			= "None"
+SWEP.Primary =
+{
+	ClipSize = 1,
+	DefaultClip = 1,
+	Automatic = true,
+	Ammo = "Pistol"
+}
 
-SWEP.weight					= 7
+SWEP.Weight					= 7
 SWEP.item_flags				= 0
 
 SWEP.damage					= 25
@@ -27,8 +31,8 @@ SWEP.SoundData				=
 }
 
 SWEP.showusagehint			= 0
-SWEP.autoswitchto			= 1
-SWEP.autoswitchfrom			= 1
+SWEP.AutoSwitchTo			= 1
+SWEP.AutoSwitchFrom			= 1
 SWEP.BuiltRightHanded		= 0
 SWEP.AllowFlipping			= 0
 SWEP.MeleeWeapon			= 0
@@ -88,7 +92,7 @@ function SWEP:PrimaryAttack()
 	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.36;
 	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.75;
 
-	self.m_iClip1 = self.m_iClip1 - 1;
+--	self.m_iClip1 = self.m_iClip1 - 1;
 
 	local vecSrc		= pPlayer:Weapon_ShootPosition();
 	local vecAiming		= pPlayer:GetAutoaimVector( 0.08715574274766 );
@@ -114,10 +118,10 @@ function SWEP:PrimaryAttack()
 	angles.z = 0;
 
 if not _CLIENT then
-	pPlayer:SnapEyeAngles( angles );
+	--pPlayer:SnapEyeAngles( angles );
 end
 
-	pPlayer:ViewPunch( QAngle( 0, random.RandomFloat( -0, -0 ), 0 ) );
+	--pPlayer:ViewPunch( QAngle( 0, random.RandomFloat( -0, -0 ), 0 ) );
 
 	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then
 		-- HEV suit - indicate out of ammo condition

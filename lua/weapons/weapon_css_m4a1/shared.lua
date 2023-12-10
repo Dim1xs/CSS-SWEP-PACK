@@ -1,21 +1,41 @@
 --//SWEP CREATED BY DIM1XS
 
-SWEP.printname				= "M4A1 CSS"
-SWEP.viewmodel 			    = "models/weapons/v_rif_m4a1.mdl"
-SWEP.viewmodelfov           =  65
-SWEP.playermodel			= "models/weapons/w_rif_m4a1.mdl"
+--//DONT TOUCH IT!
+VECTOR_CONE_1DEGREES   =     Vector( 0.00873, 0.00873, 0.00873 )
+VECTOR_CONE_2DEGREES   =     Vector( 0.01745, 0.01745, 0.01745 )
+VECTOR_CONE_3DEGREES   =     Vector( 0.02618, 0.02618, 0.02618 )
+VECTOR_CONE_4DEGREES   =     Vector( 0.03490, 0.03490, 0.03490 )
+VECTOR_CONE_5DEGREES   =     Vector( 0.04362, 0.04362, 0.04362 )
+VECTOR_CONE_6DEGREES   =     Vector( 0.05234, 0.05234, 0.05234 )
+VECTOR_CONE_7DEGREES   =     Vector( 0.06105, 0.06105, 0.06105 )
+VECTOR_CONE_8DEGREES   =     Vector( 0.06976, 0.06976, 0.06976 )
+VECTOR_CONE_9DEGREES   =     Vector( 0.07846, 0.07846, 0.07846 )
+VECTOR_CONE_10DEGREES  =     Vector( 0.08716, 0.08716, 0.08716 )
+VECTOR_CONE_15DEGREES  =     Vector( 0.13053, 0.13053, 0.13053 )
+VECTOR_CONE_20DEGREES  =     Vector( 0.17365, 0.17365, 0.17365 )
+
+SWEP.Name = "[CSS] M4A1"
+
+SWEP.PrintName				= "M4A1"
+SWEP.ViewModel 			    = "models/weapons/v_rif_m4a1.mdl"
+SWEP.ViewModelFOV           =  65
+SWEP.WorldModel				= "models/weapons/w_rif_m4a1.mdl"
 SWEP.anim_prefix			= "python"
-SWEP.bucket					= 2
-SWEP.bucket_position		= 2
+SWEP.Slot					= 2
+SWEP.SlotPos				= 0
 
-SWEP.clip_size				= 30
-SWEP.clip2_size				= -1
-SWEP.default_clip			= 30
-SWEP.default_clip2			= -1
-SWEP.primary_ammo			= "SMG1"
-SWEP.secondary_ammo			= "None"
+SWEP.ViewKick = 7
 
-SWEP.weight					= 7
+
+SWEP.Primary = 
+{
+	ClipSize = 30,
+	DefaultClip = 30,
+	Automatic = true,
+	Ammo = "SMG1"
+}
+
+SWEP.Weight					= 7
 SWEP.item_flags				= 0
 
 SWEP.damage					= 30
@@ -23,12 +43,12 @@ SWEP.damage					= 30
 SWEP.SoundData				=
 {
 	empty					= "Weapon_Pistol.Empty",
-	single_shot				= "addons/css/m4a1shoot.mp3"
+	single_shot				= "addons/weapons/m4a1/m4a1_unsil-1.wav"
 }
 
 SWEP.showusagehint			= 1
-SWEP.autoswitchto			= 1
-SWEP.autoswitchfrom			= 1
+SWEP.AutoSwitchTo			= 1
+SWEP.AutoSwitchFrom			= 1
 SWEP.BuiltRightHanded		= 0
 SWEP.AllowFlipping			= 1
 SWEP.MeleeWeapon			= 0
@@ -69,10 +89,11 @@ SWEP.m_acttable				=
 function SWEP:Initialize()
 	self.m_bReloadsSingly	= false;
 	self.m_bFiresUnderwater	= false;
+	self.SoundDelay = 0 
+	self.IsSilenced = false
 end
 
 function SWEP:Precache()
-	 self:PrecacheSound("addons/css/m4a1sil-1.mp3")
 end
 
 function SWEP:PrimaryAttack()
@@ -94,15 +115,28 @@ function SWEP:PrimaryAttack()
 		return;
 	end
 
-	self:WeaponSound( 1 );
-	pPlayer:DoMuzzleFlash();
+	--pPlayer:DoMuzzleFlash();
 
-	self:SendWeaponAnim( 180 );
+	if (self.IsSilenced == true) then
+		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
+		if (self.SoundDelay < gpGlobals.curtime()) then
+			self:EmitSound("addons/weapons/m4a1/m4a1-1.wav")
+			self.SoundDelay = gpGlobals.curtime() + 0.1;
+		end 
+	else
+		if not (self.IsSilenced == true) then
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+			self:WeaponSound( 1 );
+		else
+			return
+		end
+	end
+
 	pPlayer:SetAnimation( 5 );
 	ToHL2MPPlayer(pPlayer):DoAnimationEvent( 0 );
 
 	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.1;
-	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.100;
+	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 1.8;
 
 	self.m_iClip1 = self.m_iClip1 - 1;
 
@@ -111,7 +145,7 @@ function SWEP:PrimaryAttack()
 
 
 	-- vecSrc - position of fire, vecAiming - Directory where is shooting, bullet spread, distance, Ammo Type
-	local info = FireBulletsInfo_t(1, vecSrc, vecAiming, vec3_origin,4096, self.m_iPrimaryAmmoType);
+	local info = FireBulletsInfo_t(1, vecSrc, vecAiming, VECTOR_CONE_1DEGREES,4096, self.m_iPrimaryAmmoType);
 	info.m_flDamage = 30;
 	info.m_pAttacker = pPlayer;
 	info.m_iPlayerDamage = 14
@@ -120,18 +154,12 @@ function SWEP:PrimaryAttack()
 	-- Fire the bullets, and force the first shot to be perfectly accuracy
 	pPlayer:FireBullets( info );
 
-	--Disorient the player
-	local angles = pPlayer:GetLocalAngles();
+	local viewkick = QAngle()
+	viewkick.x = -(self.ViewKick * 0.30)--//SLIDE LIMIT
+	viewkick.y = random.RandomFloat(2 + self.ViewKick, -2 + -self.ViewKick) * 0.18 --//VERTICAL LIMIT
+	viewkick.z = 0
 
-	angles.x = angles.x + random.RandomInt( -1, 1 );
-	angles.y = angles.y + random.RandomInt( -1, 1 );
-	angles.z = 0;
-
-if not _CLIENT then
-	pPlayer:SnapEyeAngles( angles );
-end
-
-	pPlayer:ViewPunch( QAngle( -0.5, random.RandomFloat( -1, 1 ), 0 ) );
+	pPlayer:ViewPunch( viewkick )
 
 	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then
 		-- HEV suit - indicate out of ammo condition
@@ -139,13 +167,28 @@ end
 	end
 end
 
-function SWEP:Initialize()
-    self.m_bZoom = false
-end
-
 function SWEP:SecondaryAttack()
-	self.m_nBody = 1
-    self:SendWeaponAnim( 210 ); -- 210 is ACT_VM_ATTACH_SILENCER
+	local pPlayer = self:GetOwner();
+
+	if ( ToBaseEntity( pPlayer ) == NULL ) then
+		return;
+	end
+
+	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.10;
+	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 1.8;
+
+	if (self.IsSilenced == false) then
+		self.IsSilenced = true
+		self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
+	else
+		if (self.IsSilenced == true) then
+			self.IsSilenced = false
+			self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
+		else
+			return
+		end
+	end
+ 
     --//SWEP CREATED BY DIM1XS
 end
 
@@ -168,16 +211,33 @@ function SWEP:Deploy()
 end
 
 function SWEP:GetDrawActivity()
-	return 171;
-end
-
-function SWEP:Holster( pSwitchingTo )
+	if (self.IsSilenced == true) then
+		self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
+	else
+		if (self.IsSilenced == false) then
+			self:SendWeaponAnim(ACT_VM_DRAW)
+		else
+			return
+		end
+	end
 end
 
 function SWEP:ItemPostFrame()
+	if (self.IsSilenced == true) then
+		self:SetActivity(ACT_VM_IDLE_SILENCED)
+	else
+		if (self.IsSilenced == false) then
+			self:SetActivity(ACT_VM_IDLE)
+		else
+			return
+		end
+	end
 end
 
 function SWEP:ItemBusyFrame()
+end
+
+function SWEP:Holster( pSwitchingTo )
 end
 
 function SWEP:DoImpactEffect()
